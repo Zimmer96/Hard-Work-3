@@ -1,27 +1,50 @@
-"use strict";
+const lyricsList = document.getElementById('lyrics-list');
+    lyricsList.innerHTML = "";
+    // search button
+const button = document.getElementById('button')
+button.addEventListener('click',function () {
+    // Finding the value inside searchbox
+    const searchBox = document.getElementById("search-box");
+    const title = searchBox.value;
 
-const searchInput = document.getElementById("search__input");
-const searchButton = document.getElementById("search__button");
-const songContainer = document.getElementById("song__container");
-const getLyricsButtons = document.getElementsByClassName("get-lyrics-buttons");
+    // Finding artistName & title
+fetch(`https://api.lyrics.ovh/suggest/${title}`)
+.then(resp => resp.json())
+.then( data => {
+    
+const nameAndTitle = data.data;
+for (let i = 0; i < nameAndTitle.length; i++) {
+    const artistNameAndTitle  = nameAndTitle[i];
+    lyricsList.innerHTML += ` <div class="search-result col-md-8 mx-auto py-4">
 
-let previousSongId = "";
+    <div class="single-result row align-items-center my-3 p-3">
+        <div class="col-md-9">
+            <h3 class="lyrics-name">${artistNameAndTitle.title}</h3>
+            <p class="author lead">Album by <span>${artistNameAndTitle.artist.name}</span></p>
+        </div>
+        <div class="col-md-3 text-md-right text-center">
+        <button onclick="getLyrics('${artistNameAndTitle.artist.name}', '${artistNameAndTitle.title}')" class="btn btn-success">Get Lyrics</button>
+        </div>
+    </div>
+    </div>`; 
+        
+}
 
-// Functionality after pressing a search key word
-searchButton.addEventListener("click", (event) => {
-  event.preventDefault();
-  previousSongId = "";
-  if (searchInput.value) {
-    searchSong(searchInput.value);
-  }
-});
 
-// Show or Hide the lyrics after clicking the Get lyrics button
-songContainer.addEventListener("click", async (e) => {
-  let songId = e.target.getAttribute("song-id");
-  if (previousSongId) {
-    document.getElementById(previousSongId).classList.add("d-none"); // Off the previously opened lyrics
-  }
-  document.getElementById(songId).classList.toggle("d-none");
-  previousSongId = songId;
 })
+})
+
+
+
+// Finding lyrics
+
+function getLyrics(artistName,title) {
+    fetch(`https://api.lyrics.ovh/v1/${artistName}/${title}`)
+.then(resp => resp.json())
+.then(lyrics => {
+   
+    
+    document.getElementById('lyrics').innerHTML = lyrics.lyrics;
+    
+})
+}
